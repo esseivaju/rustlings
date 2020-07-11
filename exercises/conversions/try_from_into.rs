@@ -11,8 +11,6 @@ struct Color {
     blue: u8,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation
 // and return an Ok result of inner type Color.
 // You need create implementation for a tuple of three integer,
@@ -22,10 +20,27 @@ struct Color {
 // but slice implementation need check slice length!
 // Also note, that chunk of correct rgb color must be integer in range 0..=255.
 
+fn in_range(c: i16) -> bool {
+    0 <= c && c <= 255 
+}
+
+fn validate(red: i16, green: i16, blue: i16) -> Option<Color> {
+    if in_range(red) && in_range(green) && in_range(blue) {
+        Some(Color {red: red as u8, green: green as u8, blue: blue as u8})
+    } else {
+        None
+    }
+}
+
 // Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = String;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        if let Some(color) = validate(tuple.0, tuple.1, tuple.2) {
+            Ok(color)
+        } else {
+            Err(String::from("Invalid color"))
+        }
     }
 }
 
@@ -33,6 +48,11 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = String;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        if let Some(color) = validate(arr[0], arr[1], arr[2]) {
+            Ok(color)
+        } else {
+            Err(String::from("Invalid color"))
+        }
     }
 }
 
@@ -40,6 +60,19 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = String;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(String::from("Not enough color values"));
+        }
+        let mut iter = slice.iter();
+        if let (Some(&red), Some(&green), Some(&blue)) = (iter.next(), iter.next(), iter.next()) {
+            if let Some(color) = validate(red, green, blue) {
+                Ok(color)
+            } else {
+                Err(String::from("Invalid color"))
+            }
+        } else {
+            Err(String::from("Not enough color values"))
+        }
     }
 }
 
